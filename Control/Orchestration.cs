@@ -15,6 +15,8 @@ namespace Control {
         static bool enableBtnIsPressed = false;
         static bool leftClickPressed = false;
         static bool rightClickPressed = false;
+        static bool leftShoulderPressed = false;
+        static bool rightShoulderPressed = false;
 
         public static void Start() {
             writeInfo();
@@ -94,6 +96,24 @@ namespace Control {
                 if (rightClickPressed && ButtonState.Released == reader.Buttons.X) {
                     rightClickPressed = false;
                     pc.rightClickUp();
+                }
+
+                if (!leftShoulderPressed && ButtonState.Pressed == reader.Buttons.LeftShoulder) {
+                    leftShoulderPressed = true;
+                    System.Diagnostics.Process.Start("http://youtube.com");
+                }
+
+                if (leftShoulderPressed && ButtonState.Released == reader.Buttons.LeftShoulder) {
+                    leftShoulderPressed = false;
+                }
+
+                if (!rightShoulderPressed && ButtonState.Pressed == reader.Buttons.RightShoulder) {
+                    rightShoulderPressed = true;
+                    System.Diagnostics.Process.Start("https://www.netflix.com/browse");
+                }
+
+                if (rightShoulderPressed && ButtonState.Released == reader.Buttons.RightShoulder) {
+                    rightShoulderPressed = false;
                 }
 
                 double rightStickY = reader.ThumbSticks.Right.Y;
