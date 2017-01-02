@@ -1,0 +1,26 @@
+{
+  "turn_off" : {
+    "type": "request",
+    "uri":"ssap://system/turnOff"
+  },
+
+  "volume_down" : {
+	"type": "request",
+	"uri":"ssap://audio/volumeDown"
+  },
+
+  "volume_up" : {
+	"type": "request",
+	"uri":"ssap://audio/volumeUp"
+  },
+
+  "channel_up" : {
+	"type": "request",
+	"uri":"ssap://tv/channelUp"
+  },
+
+  "channel_down" : {
+	"type": "request",
+	"uri":"ssap://tv/channelDown"
+  },
+}
