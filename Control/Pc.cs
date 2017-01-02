@@ -16,9 +16,10 @@ namespace Control {
         private const UInt32 MOUSEEVENTF_RIGHTDOWN = 0x0008;
         private const UInt32 MOUSEEVENTF_RIGHTUP = 0x0010;
         private const UInt32 MOUSEEVENTF_WHEEL = 0x0800;
+        private const UInt32 MOUSEEVENTF_HWHEEL = 0x01000;
 
         [DllImport("user32.dll")]
-        private static extern void mouse_event(uint dwFlags, uint dx, uint dy, uint dwData, uint dwExtraInf);
+        private static extern void mouse_event(uint dwFlags, uint dx, uint dy, int dwData, uint dwExtraInf);
 
         public Pc() {
             SystemEvents.PowerModeChanged += OnPowerChange;
@@ -56,6 +57,14 @@ namespace Control {
 
         public void rightClickDown() {
             mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0);
+        }
+
+        public void wheel(int direction) {
+            mouse_event(MOUSEEVENTF_WHEEL, 0, 0, direction * 120, 0);
+        }
+
+        public void hWheel(int direction) {
+            mouse_event(MOUSEEVENTF_HWHEEL, 0, 0, direction * 120, 0);
         }
 
         private void OnPowerChange(object s, PowerModeChangedEventArgs e) {

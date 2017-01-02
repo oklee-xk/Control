@@ -10,7 +10,7 @@ namespace Control {
         static Pc pc = new Pc();
         const bool TV_ENABLE = true;
         const bool PC_ENABLE = true;
-        const float MAX_MOUSE_VEL = 80; // pixels/frame
+        const float MAX_MOUSE_VEL = 50; // pixels/frame
         static bool ENABLE = true;
         static bool enableBtnIsPressed = false;
         static bool leftClickPressed = false;
@@ -96,15 +96,21 @@ namespace Control {
                     pc.rightClickUp();
                 }
 
-                //mouse movements
-                double x = reader.ThumbSticks.Left.X;
-                double y = reader.ThumbSticks.Left.Y;
-                x = Math.Sign(x) * Math.Abs(Math.Pow(x, 3) *  MAX_MOUSE_VEL);
-                y = Math.Sign(y) * Math.Abs(Math.Pow(y, 3) * MAX_MOUSE_VEL);
-                x =  Math.Ceiling(x);
-                y = -Math.Ceiling(y);
+                double rightStickY = reader.ThumbSticks.Right.Y;
+                double rightStickX = reader.ThumbSticks.Right.X;
+                if (rightStickY != 0) pc.wheel(Math.Sign(rightStickY));
+                if (rightStickX != 0) pc.hWheel(Math.Sign(rightStickX));
 
-                pc.moveCursor((int) x, (int) y, true);
+
+                //mouse movements
+                double leftStickX = reader.ThumbSticks.Left.X;
+                double leftStickY = reader.ThumbSticks.Left.Y;
+                leftStickX = Math.Sign(leftStickX) * Math.Abs(Math.Pow(leftStickX, 3) *  MAX_MOUSE_VEL);
+                leftStickY = Math.Sign(leftStickY) * Math.Abs(Math.Pow(leftStickY, 3) * MAX_MOUSE_VEL);
+                leftStickX =  Math.Ceiling(leftStickX);
+                leftStickY = -Math.Ceiling(leftStickY);
+
+                pc.moveCursor((int) leftStickX, (int) leftStickY, true);
             }
 
 
