@@ -65,13 +65,13 @@ namespace Remote {
                     break;
                 case "error":
                     isPromptVisibleProperty = false;
-                    Debug.WriteLine("User decline registration");
+                    Console.WriteLine("User decline registration");
                     break;
             }
         }
 
         public void manageMessages(string response) {
-            Debug.WriteLine(response);
+            Console.WriteLine(response);
             JObject json = JObject.Parse(response);
             JObject payload = (JObject)json["payload"];
 
@@ -83,7 +83,10 @@ namespace Remote {
                     registerMessages(payload, type);
                     break;
                 case MSG_IDS.turn_off:
-                    if ((bool) payload["returnValue"]) connection.close();
+                    if ((bool)payload["returnValue"]) {
+                        connection.close();
+                        if (!isConnected)  isPairedProperty = false;
+                    }
                     break;
             }
         }

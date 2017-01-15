@@ -8,25 +8,27 @@ namespace Control {
     static class Orchestration {
         static LGTV tv = new LGTV(Constants.IP);
         static Pc pc = new Pc();
+        static Timer connectionTimer = new Timer();
+        static Timer timer = new Timer();
         const bool TV_ENABLE = true;
         const bool PC_ENABLE = true;
-        const float MAX_MOUSE_VEL = 50; // pixels/frame
+        const float MAX_MOUSE_VEL = 20; // pixels/frame
         static bool ENABLE = true;
         static bool enableBtnIsPressed = false;
         static bool leftClickPressed = false;
+        static bool leftStickPressed = false;
         static bool rightClickPressed = false;
         static bool leftShoulderPressed = false;
         static bool rightShoulderPressed = false;
+        static bool turnOffBtnPressed = false;
 
         public static void Start() {
             writeInfo();
 
-            Timer connectionTimer = new Timer();
             connectionTimer.Elapsed += new ElapsedEventHandler(ConnectTv);
             connectionTimer.Interval = 3000;
             connectionTimer.Enabled = TV_ENABLE;
 
-            Timer timer = new Timer();
             timer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
             timer.Interval = 17;
             timer.Enabled = true;
@@ -37,9 +39,13 @@ namespace Control {
             Console.WriteLine("PC is {0}", TV_ENABLE ? "enable" : "disable");
         }
 
+        public static bool ImInBrowser() {
+            //TODO
+            return false;
+        }
+
         private static void ConnectTv(object source, ElapsedEventArgs e) {
             if (tv.isPaired) {
-                Console.WriteLine("Tv is Paired");
                 ((Timer)source).Enabled = false;
                 return;
             }
@@ -74,7 +80,7 @@ namespace Control {
 
             //PC Stuff
             if (PC_ENABLE) {
-                if (ButtonState.Pressed == reader.Buttons.Back) {
+                if (!turnOffBtnPressed && ButtonState.Pressed == reader.Buttons.Back) {
                     pc.sleep();
                 }
 
@@ -85,6 +91,16 @@ namespace Control {
 
                 if (leftClickPressed && ButtonState.Released == reader.Buttons.A) {
                     leftClickPressed = false;
+                    pc.leftClickUp();
+                }
+
+                if (!leftStickPressed && ButtonState.Pressed == reader.Buttons.LeftStick) {
+                    leftStickPressed = true;
+                    pc.leftClickDown();
+                }
+
+                if (leftStickPressed && ButtonState.Released == reader.Buttons.LeftStick) {
+                    leftStickPressed = false;
                     pc.leftClickUp();
                 }
 
@@ -125,30 +141,41 @@ namespace Control {
                 //mouse movements
                 double leftStickX = reader.ThumbSticks.Left.X;
                 double leftStickY = reader.ThumbSticks.Left.Y;
-                leftStickX = Math.Sign(leftStickX) * Math.Abs(Math.Pow(leftStickX, 3) *  MAX_MOUSE_VEL);
-                leftStickY = Math.Sign(leftStickY) * Math.Abs(Math.Pow(leftStickY, 3) * MAX_MOUSE_VEL);
-                leftStickX =  Math.Ceiling(leftStickX);
-                leftStickY = -Math.Ceiling(leftStickY);
+                leftStickX *= MAX_MOUSE_VEL;
+                leftStickY *= -MAX_MOUSE_VEL;
+                //leftStickX = Math.Sign(leftStickX) * Math.Abs(Math.Pow(leftStickX, 2) *  MAX_MOUSE_VEL);
+                //leftStickY = Math.Sign(leftStickY) * Math.Abs(Math.Pow(leftStickY, 2) * MAX_MOUSE_VEL);
+                //leftStickX =  Math.Ceiling(leftStickX);
+                //leftStickY = -Math.Ceiling(leftStickY);
 
                 pc.moveCursor((int) leftStickX, (int) leftStickY, true);
             }
 
 
             //TV Stuff
+            if (TV_ENABLE) connectionTimer.Enabled = !tv.isConnected;
+
             if (TV_ENABLE && reader.IsConnected && tv.isPaired) {
-                if (ButtonState.Pressed == reader.Buttons.Back) {
+                if (!turnOffBtnPressed && ButtonState.Pressed == reader.Buttons.Back) {
                     tv.off();
                 }
 
                 if (ButtonState.Pressed == reader.Buttons.Y) {
-                    Console.WriteLine("Volume Up");
                     tv.volumeUp();
                 }
 
                 if (ButtonState.Pressed == reader.Buttons.B) {
-                    Console.WriteLine("Volume Down");
                     tv.volumeDown();
                 }
+            }
+
+            //conditionals for the tv off btn.
+            if (!turnOffBtnPressed && ButtonState.Pressed == reader.Buttons.Back) {
+                turnOffBtnPressed = true;
+            }
+
+            if (turnOffBtnPressed && ButtonState.Released == reader.Buttons.Back) {
+                turnOffBtnPressed = false;
             }
         }
     }

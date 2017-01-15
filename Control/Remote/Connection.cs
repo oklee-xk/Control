@@ -17,7 +17,10 @@ namespace Remote {
 
         public Connection(Uri uri) {
             this.uri = uri;
+            createMessage();
+        }
 
+        private void createMessage() {
             message = new MessageWebSocket();
             message.Control.MessageType = SocketMessageType.Utf8;
             message.MessageReceived += defaultMessageRecievedHandler;
@@ -36,23 +39,25 @@ namespace Remote {
             connected = false;
             message?.Close(1000, "");
             message?.Dispose();
-            Debug.WriteLine("Connection closed");
+            writer?.Dispose();
+            Console.WriteLine("Connection closed");
         }
 
         public async Task<bool> connect() {
             try {
-                Debug.WriteLine("Start Connecting");
+                Console.WriteLine("Start Connecting");
+                if (message == null) createMessage();
                 await message.ConnectAsync(uri);
-                Debug.WriteLine("Connected!");
+                Console.WriteLine("Connected!");
                 connected = true;
             } catch(Exception e) {
                 connected = false;
                 switch (SocketError.GetStatus(e.HResult)) {
                     case SocketErrorStatus.HostNotFound:
-                        Debug.WriteLine("Host not found");
+                        Console.WriteLine("Host not found");
                         break;
                     default:
-                        Debug.WriteLine(e.Message);
+                        Console.WriteLine(e.Message);
                         break;
                 }
             }
